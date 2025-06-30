@@ -145,17 +145,17 @@
   <section id="chatbot" class="active">
     <h2>Consultation Spirituelle</h2>
     <div class="chatbot-container">
-    <p>Entrez en communication avec notre assistant spirituel...</p>
-
-    <flowise-fullchatbot></flowise-fullchatbot>
-    <script type="module">
-        import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
-        Chatbot.initFull({
-            chatflowid: "7b622681-09e8-45cd-b34d-acd8305fbfe7",
-            apiHost: "https://cloud.flowiseai.com",
-        })
-    </script>
-    </div>
+      <p>Entrez en communication avec notre assistant spirituel. Cet espace est prêt à accueillir l'intelligence de notre chatbot pour des échanges profonds et personnalisés.</p>
+      
+      <flowise-fullchatbot></flowise-fullchatbot>
+      <script type="module">
+          import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
+          Chatbot.initFull({
+              chatflowid: "7b622681-09e8-45cd-b34d-acd8305fbfe7",
+              apiHost: "https://cloud.flowiseai.com",
+          })
+      </script>
+      </div>
   </section>
 
   <section id="diagnostic">
@@ -305,28 +305,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const wizardControls = document.getElementById('wizard-controls');
     let summaryData = [];
 
-    // --- DATA STRUCTURE FOR PHENOMENA ---
     const phenomenaData = {
-        "Phénomènes Auditifs": {
-            prompt: "Avez-vous entendu quelque chose d'inhabituel ?",
-            choices: {
-                "pheno_voix": { label: "Voix (chuchotements, paroles claires, cris, gémissements)", verb: "entendu" },
-                "pheno_bruits": { label: "Bruits (coups, grattements, pas, portes qui grincent)", verb: "entendu" },
-                "pheno_musique": { label: "Musique (mélodie reconnaissable, notes diffuses ?)", verb: "entendu" },
-                "pheno_auditif_autre": { label: "Autre", verb: "entendu", isOther: true }
-            }
-        },
-        "Phénomènes Visuels": {
-            prompt: "Avez-vous vu quelque chose d'inhabituel ?",
-            choices: {
-                "pheno_apparition": { label: "Apparition (forme humaine, animale, autre ?)", verb: "vu" },
-                "pheno_ombre": { label: "Ombre (silhouette définie, masse sombre informe ?)", verb: "vu" },
-                "pheno_lumiere": { label: "Lumière (orbe, flash, scintillement ?)", verb: "vu" },
-                "pheno_mouvement": { label: "Mouvement (objet déplacé, porte ouverte/fermée, rideau qui bouge ?)", verb: "observé" },
-                "pheno_visuel_autre": { label: "Autre", verb: "vu", isOther: true }
-            }
-        },
-        // ... (Add all other categories here in the same structure)
+        "Phénomènes Auditifs": { prompt: "Avez-vous entendu quelque chose d'inhabituel ?", choices: { "pheno_voix": { label: "Voix (chuchotements, paroles claires, cris, gémissements)", verb: "entendu" }, "pheno_bruits": { label: "Bruits (coups, grattements, pas, portes qui grincent)", verb: "entendu" }, "pheno_musique": { label: "Musique (mélodie reconnaissable, notes diffuses ?)", verb: "entendu" }, "pheno_auditif_autre": { label: "Autre", verb: "entendu", isOther: true } } },
+        "Phénomènes Visuels": { prompt: "Avez-vous vu quelque chose d'inhabituel ?", choices: { "pheno_apparition": { label: "Apparition (forme humaine, animale, autre ?)", verb: "vu" }, "pheno_ombre": { label: "Ombre (silhouette définie, masse sombre informe ?)", verb: "vu" }, "pheno_lumiere": { label: "Lumière (orbe, flash, scintillement ?)", verb: "vu" }, "pheno_mouvement": { label: "Mouvement (objet déplacé, porte ouverte/fermée, rideau qui bouge ?)", verb: "observé" }, "pheno_visuel_autre": { label: "Autre", verb: "vu", isOther: true } } },
         "Phénomènes Tactiles": { prompt: "Avez-vous ressenti quelque chose d'inhabituel ?", choices: { "pheno_contact": { label: "Contact (effleurement, caresse, main posée ?)", verb: "ressenti" }, "pheno_pression": { label: "Pression (poussée, traction, sensation d’être tenu ?)", verb: "ressenti" }, "pheno_vibration": { label: "Vibration (dans le sol, sur un meuble ?)", verb: "ressenti" }, "pheno_tactile_autre": { label: "Autre", verb: "ressenti", isOther: true } } },
         "Phénomènes Thermiques": { prompt: "Avez-vous perçu un changement inhabituel de température soudain et localisé ?", choices: { "pheno_froid": { label: "Point froid soudain", verb: "perçu" }, "pheno_chaleur": { label: "Vague de chaleur inexpliquée", verb: "perçu" }, "pheno_souffle": { label: "Sensation de souffle (froid ou chaud)", verb: "ressenti" }, "pheno_thermique_autre": { label: "Autre", verb: "perçu", isOther: true } } },
         "Phénomènes Olfactifs": { prompt: "Avez-vous senti une odeur inhabituelle sans source apparente ?", choices: { "pheno_parfum": { label: "Parfum floral", verb: "senti" }, "pheno_soufre": { label: "Soufre", verb: "senti" }, "pheno_tabac": { label: "Tabac", verb: "senti" }, "pheno_nourriture": { label: "Nourriture", verb: "senti" }, "pheno_nauseabonde": { label: "Odeur nauséabonde", verb: "senti" }, "pheno_olfactif_autre": { label: "Autre", verb: "senti", isOther: true } } },
@@ -334,7 +315,6 @@ document.addEventListener('DOMContentLoaded', function() {
         "Phénomènes d'Emprise": { prompt: "Avez-vous ressenti une perte de contrôle ?", choices: { "pheno_possession": { label: "Possession (sentiment d’invasion, dialogues intérieurs imposés, contrôle des mouvements, perte de contrôle, colère...)", verb: "subi" } } }
     };
     
-    // Dynamically build the initial selection HTML
     let initialHTML = '';
     for (const category in phenomenaData) {
         initialHTML += `<fieldset><legend>${category}</legend>`;
@@ -370,7 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.querySelectorAll('.phenomenon-choice').forEach(choice => {
             if (choice.querySelector('.phenomenon-checkbox').checked) {
                 choice.dataset.status = 'pending';
-                phase1Container.appendChild(choice); // Move selected to end for processing
+                phase1Container.appendChild(choice);
             } else {
                 choice.closest('fieldset').classList.add('hidden');
             }
@@ -559,13 +539,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-
-  <script type="module">
-    import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
-    Chatbot.init({
-        chatflowid: "7b622681-09e8-45cd-b34d-acd8305fbfe7",
-        apiHost: "https://cloud.flowiseai.com",
-    })
-</script>
-</body>
-</html>

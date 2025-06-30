@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>4Dinv - 4ème Dimension Invisible</title>
+  <style>
+    /* Reset & Base Styles from Qwen */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(to bottom, #0b0c10, #1f2833);
+      color: #cdd9e5;
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, h4 { color: #FFD700; font-weight: 600; }
+    button { cursor: pointer; transition: all 0.3s ease; }
+
+    /* Background Particles from Qwen */
+    #particles-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Header from Qwen */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      border-bottom: 1px solid #333;
+    }
+    .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: bold; }
+    nav { display: flex; gap: 2rem; }
+    nav button { background: none; border: none; color: #ccc; font-size: 1rem; position: relative; }
+    nav button:hover, nav button.active { color: #FFD700; }
+    nav button::after { content: ''; position: absolute; left: 0; bottom: -5px; width: 0%; height: 2px; background-color: #FFD700; transition: width 0.3s ease; }
+    nav button:hover::after, nav button.active::after { width: 100%; }
+
+    /* Main Content Area */
+    main { max-width: 1200px; margin: auto; padding: 2rem; position: relative; z-index: 1; }
+    section { display: none; animation: fadeInUp 0.8s ease-in-out; }
+    section.active { display: block; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Styles for Chatbot & Testimonies sections from Qwen */
+    .chatbot-container, .testimony-form, .testimony-card {
+      background: linear-gradient(145deg, #1a1a1a, #222);
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+      border: 1px solid #444;
+    }
+    .chatbot-placeholder { background: #111; border: 1px dashed #555; color: #888; padding: 2rem; text-align: center; border-radius: 8px; min-height: 300px; display: flex; align-items: center; justify-content: center; font-style: italic; }
+    .testimonies-grid { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+     @media (min-width: 768px) { .testimonies-grid { grid-template-columns: 1fr 2fr; } }
+    .testimony-form input, .testimony-form textarea { width: 100%; background-color: #222; border: 1px solid #444; padding: 0.7rem; border-radius: 5px; margin-top: 0.5rem; color: #fff; }
+    .testimony-list { display: flex; flex-direction: column; gap: 1rem; }
+    .testimony-card { transition: transform 0.3s ease; }
+    .testimony-card:hover { transform: scale(1.02); border-color: #FFD700; }
+    .testimony-card h4 { margin-bottom: 0.5rem; }
+    
+    /* MERGED & ADAPTED STYLES FOR THE QUESTIONNAIRE */
+    #diagnostic .container { padding: 0; background: none; box-shadow: none; }
+    #diagnostic h1, #diagnostic h2, #diagnostic h3 { color: #FFD700; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    #diagnostic fieldset { border: 1px solid #444; border-radius: 6px; padding: 25px; margin-bottom: 30px; }
+    #diagnostic legend { font-size: 1.6em; font-weight: 600; padding: 0 15px; color: #FFD700; }
+    #diagnostic .hidden { display: none !important; }
+    #diagnostic .phenomenon-choice { 
+        margin-bottom: 15px; 
+        background-color: #1f2833; 
+        border: 2px solid transparent; 
+        border-radius: 5px; 
+        transition: all 0.3s ease;
+        scroll-margin-top: 180px; 
+    }
+    #diagnostic .phenomenon-header { padding: 12px; }
+    #diagnostic .phenomenon-header.is-sticky { position: sticky; top: 80px; background-color: #0b0c10; z-index: 100; box-shadow: 0 4px 6px rgba(0,0,0,0.2); border-bottom: 2px solid #FFD700; }
+    #diagnostic .live-score-display { text-align: center; font-size: 1.2em; font-weight: bold; color: #cdd9e5; background: #2a3440; padding: 10px; border-radius: 5px; margin: 0 12px 12px 12px; }
+    #diagnostic .live-score-display.is-sticky { position: sticky; top: 155px; z-index: 99; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    #diagnostic .phenomenon-choice[data-status="pending"] { border-color: #FFD700; }
+    #diagnostic .phenomenon-choice[data-status="done"] { background-color: #1c3d24; border-color: #28a745; }
+    #diagnostic .phenomenon-choice[data-status="done"] .phenomenon-header.is-sticky { border-bottom-color: #28a745; }
+    #diagnostic .wizard-step-wrapper { padding: 0 12px 12px 12px; }
+    #diagnostic .wizard-section { margin-top: 10px; padding: 20px; border-radius: 5px; border: 1px solid; }
+    #diagnostic .intensity-section { background-color: rgba(255, 249, 219, 0.1); border-color: #ffe066; }
+    #diagnostic .scope-frequency-wrapper { background-color: rgba(240, 248, 255, 0.1); border-color: #b0e0e6; }
+    #diagnostic .intelligence-wrapper { background-color: rgba(252, 228, 236, 0.1); border-color: #f8bbd0; }
+    #diagnostic .impact-wrapper { background-color: rgba(230, 230, 250, 0.1); border-color: #d8bfd8; }
+    #diagnostic .wizard-level { margin-bottom: 15px; }
+    #diagnostic label { font-weight: 500; display: inline-block; margin-left: 8px; vertical-align: middle; }
+    #diagnostic .description-input, #diagnostic .other-input { width: 100%; padding: 10px; margin-top: 8px; box-sizing: border-box; border: 1px solid #444; border-radius: 4px; font-size: 0.95em; background-color: #222; color: #cdd9e5; }
+    #diagnostic .action-button { padding: 12px 25px; color: black; background-color: #FFD700; border: none; border-radius: 5px; cursor: pointer; font-size: 1.1em; margin-top: 15px; font-weight: 600; transition: background-color 0.2s, transform 0.1s; }
+    #diagnostic .action-button:disabled { background-color: #6c757d; cursor: not-allowed; color: #ccc; }
+    #diagnostic .validate-step-btn { position: sticky; bottom: 0; left: 0; width: 100%; z-index: 99; margin: 0; border-radius: 0; padding: 15px; box-shadow: 0 -4px 8px rgba(0,0,0,0.1); }
+    #diagnostic #summary-container { margin-top: 30px; background-color: #1a1a1a; padding: 20px; border-radius: 8px; border: 1px solid #444; }
+    #diagnostic .calculation { font-family: 'Courier New', Courier, monospace; background: #2a3440; padding: 10px; border-radius: 4px; margin-top: 10px; line-height: 1.8; color: #e9ecef; }
+    #diagnostic .thermometer-container { border: 1px solid #555; background: #2a3440; padding: 4px; border-radius: 8px; margin-top: 10px; }
+    #diagnostic .thermometer-fill { height: 25px; width: 0%; border-radius: 5px; transition: width 1s ease-out, background-color 1s ease-out; text-align: right; color: white; font-weight: bold; padding-right: 10px; line-height: 25px; box-sizing: border-box; }
+    #diagnostic .diagnostic-box { margin-top: 20px; padding: 20px; border-radius: 5px; border-left: 5px solid; }
+
+    /* Footer & Admin Styles from Qwen */
+    footer { text-align: center; margin-top: 3rem; padding: 2rem 1rem; font-size: 0.9rem; color: #888; border-top: 1px solid #333; }
+    .admin-panel { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
+    .admin-modal { background-color: #1e1e1e; padding: 2rem; border-radius: 12px; max-width: 400px; width: 90%; border: 1px solid #444; box-shadow: 0 0 20px rgba(255, 215, 0, 0.1); }
+    .admin-modal input[type="password"] { width: 100%; padding: 0.7rem; border: 1px solid #444; background-color: #222; color: white; border-radius: 5px; margin-bottom: 1rem; }
+    .btn-yellow, .btn-blue { color: black; border: none; padding: 0.7rem 1.5rem; border-radius: 5px; font-weight: bold; }
+    .btn-yellow { background-color: #FFD700; box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3); }
+    .btn-blue { background-color: #007bff; color: white; box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); }
+
+  </style>
+</head>
+<body>
+
+<canvas id="particles-bg"></canvas>
+
+<header>
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+    <span>4Dinv</span>
+  </div>
+  <nav>
+    <button onclick="showSection('chatbot')" class="nav-btn active">Consultation Spirituelle</button>
+    <button onclick="showSection('diagnostic')" class="nav-btn">Diagnostic</button>
+    <button onclick="showSection('testimonies')" class="nav-btn">Témoignages</button>
+  </nav>
+</header>
+
+<main>
+  <section id="chatbot" class="active">
+    <h2>Consultation Spirituelle</h2>
+    <div class="chatbot-container">
+      <p>Entrez en communication avec notre assistant spirituel. Cet espace est prêt à accueillir l'intelligence de notre chatbot pour des échanges profonds et personnalisés.</p>
+      <div id="chatbot-integration-point" class="chatbot-placeholder">
+        Zone de chat temporaire - intégration FlowiseAI à venir
+      </div>
+    </div>
+  </section>
+
+  <section id="diagnostic">
+    <div class="container">
+        <h1>Outil d'Analyse Paranormale</h1>
+        <form id="paranormal-form" onsubmit="return false;">
+            <div id="phase-1-selection">
+                <p><strong>Étape 1 :</strong> Cochez tous les phénomènes que vous avez personnellement vécus. Une fois votre sélection faite, cliquez sur le bouton en bas pour commencer à décrire chaque expérience en détail.</p>
+                </div>
+            <div id="wizard-controls">
+                <button type="button" id="start-detailing-btn" class="action-button" disabled>Prêt à décrire l'intensité</button>
+            </div>
+            <div id="summary-container" class="hidden"></div>
+        </form>
+    </div>
+  </section>
+
+  <section id="testimonies">
+    <h2>Expériences Partagées</h2>
+    <div class="testimonies-grid">
+      <div class="testimony-form">
+        <h3>Partager votre expérience</h3>
+        <form onsubmit="submitTestimony(event)">
+          <label for="title">Titre de l'expérience</label>
+          <input type="text" id="title" required placeholder="Ex: Rencontre surnaturelle"/>
+          <label for="content">Votre témoignage</label>
+          <textarea id="content" rows="6" required placeholder="Décrivez votre expérience..."></textarea>
+          <button type="submit" class="btn-yellow">Publier</button>
+        </form>
+      </div>
+      <div class="testimony-list" id="testimonyList">
+        <div class="testimony-card">
+          <h4>Rencontre dans le noir</h4><p>Une nuit, j'ai entendu des voix alors que j'étais seul à la maison...</p>
+        </div>
+        <div class="testimony-card">
+          <h4>Ombres mouvantes</h4><p>Des silhouettes noires se déplaçaient sans bruit dans ma chambre...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>&copy; 2025 4Dinv - Tous droits réservés</p>
+  <button onclick="document.getElementById('adminPanel').style.display = 'flex'" style="margin-top: 1rem; background: none; color: #aaa; font-size: 0.9rem; border:none;">Admin</button>
+</footer>
+
+<div class="admin-panel" id="adminPanel">
+  <div class="admin-modal">
+    <h3>Connexion Admin</h3>
+    <input type="password" placeholder="Mot de passe" id="adminPassword" />
+    <button onclick="loginAdmin()" class="btn-yellow">Se connecter</button>
+  </div>
+</div>
+
+
+<template id="intensity-template">
+    <div class="wizard-step-wrapper"><div class="wizard-section intensity-section"><p><strong>Axe 2 : Avec quelle intensité ce phénomène s’est-il produit ?</strong></p><div class="wizard-level"><input type="radio" id="level1_{id}" name="intensity_{id}" value="1"><label for="level1_{id}">Niveau 1 (Subtil)</label><textarea class="description-input" placeholder="Décrivez votre expérience..."></textarea></div><div class="wizard-level"><input type="radio" id="level2_{id}" name="intensity_{id}" value="2"><label for="level2_{id}">Niveau 2 (Observable)</label><textarea class="description-input" placeholder="Décrivez votre expérience..."></textarea></div><div class="wizard-level"><input type="radio" id="level3_{id}" name="intensity_{id}" value="3"><label for="level3_{id}">Niveau 3 (Interactif léger)</label><textarea class="description-input" placeholder="Décrivez l'interaction..."></textarea></div><div class="wizard-level"><input type="radio" id="level4_{id}" name="intensity_{id}" value="4"><label for="level4_{id}">Niveau 4 (Agressif)</label><textarea class="description-input" placeholder="Décrivez l'action..."></textarea></div><div class="wizard-level"><input type="radio" id="level5_{id}" name="intensity_{id}" value="5"><label for="level5_{id}">Niveau 5 (Dominant)</label><textarea class="description-input" placeholder="Décrivez la scène..."></textarea></div></div></div>
+</template>
+<template id="scope-frequency-template">
+    <div class="wizard-step-wrapper"><div class="wizard-section scope-frequency-wrapper"><div class="sf-section"><p><strong>Axe 3.1 : Quelle était la portée spatiale ?</strong></p><div class="wizard-level"><input type="radio" name="scope_{id}" value="Ponctuelle"><label>Ponctuelle</label></div><div class="wizard-level"><input type="radio" name="scope_{id}" value="Localisée"><label>Localisée</label></div><div class="wizard-level"><input type="radio" name="scope_{id}" value="Étendue"><label>Étendue</label></div><div class="wizard-level"><input type="radio" name="scope_{id}" value="Personnelle"><label>Personnelle</label></div></div><div class="sf-section"><p><strong>Axe 3.2 : Quelle était sa fréquence ?</strong></p><div class="wizard-level"><input type="radio" name="frequency_{id}" value="Unique"><label>Unique</label></div><div class="wizard-level"><input type="radio" name="frequency_{id}" value="Sporadique"><label>Sporadique</label></div><div class="wizard-level"><input type="radio" name="frequency_{id}" value="Cyclique"><label>Cyclique</label></div><div class="wizard-level"><input type="radio" name="frequency_{id}" value="Continu / Escalatoire"><label>Continu / Escalatoire</label></div></div></div></div>
+</template>
+<template id="intelligence-template">
+    <div class="wizard-step-wrapper"><div class="wizard-section intelligence-wrapper"><p><strong>Axe 4 : Quel niveau de conscience le phénomène semble-t-il manifester ?</strong></p><div class="wizard-level"><input type="radio" name="intelligence_{id}" value="Non-conscient et non-réactif"><label>Non-conscient (Répétition)</label></div><div class="wizard-level"><input type="radio" name="intelligence_{id}" value="Conscience simple et Réactif"><label>Réactif (Simple)</label></div><div class="wizard-level"><input type="radio" name="intelligence_{id}" value="Conscience intelligente"><label>Intelligent (Cohérent)</label></div><div class="wizard-level"><input type="radio" name="intelligence_{id}" value="Haute conscience et Manipulateur"><label>Manipulateur</label></div><div class="wizard-level"><input type="radio" name="intelligence_{id}" value="Autre"><label>Autre...</label><textarea class="description-input hidden" placeholder="Décrivez le comportement..."></textarea></div></div></div>
+</template>
+<template id="impact-template">
+    <div class="wizard-step-wrapper"><div class="wizard-section impact-wrapper"><p><strong>Axe 5 : Quel a été l'impact émotionnel sur vous ?</strong></p><div class="wizard-level"><input type="radio" name="impact_{id}" value="Positif / Réconfortant"><label>Positif / Réconfortant</label></div><div class="wizard-level"><input type="radio" name="impact_{id}" value="Neutre / Curieux"><label>Neutre / Curieux</label></div><div class="wizard-level"><input type="radio" name="impact_{id}" value="Confusion / Anxiogène"><label>Confusion / Anxiogène</label></div><div class="wizard-level"><input type="radio" name="impact_{id}" value="Négatif / Effrayant"><label>Négatif / Effrayant</label></div><div class="wizard-level"><input type="radio" name="impact_{id}" value="Terrifiant / Oppressant"><label>Terrifiant / Oppressant</label></div><div class="wizard-level"><input type="radio" name="impact_{id}" value="Possession"><label>Possession (Sentiment de contrôle externe)</label></div></div></div>
+</template>
+<template id="live-score-template">
+    <div class="live-score-display">Indice Spécifique : <span>0.000</span></div>
+</template>
+
+
+<script>
+// --- QWEN's SCRIPT FOR NAVIGATION & PARTICLES ---
+const canvas = document.getElementById("particles-bg");
+const ctx = canvas.getContext("2d");
+let w, h;
+function resizeCanvas() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+const particles = [];
+const particleCount = 100;
+for (let i = 0; i < particleCount; i++) {
+    particles.push({ x: Math.random() * w, y: Math.random() * h, radius: Math.random() * 2 + 1, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5 });
+}
+function drawParticles() {
+    ctx.clearRect(0, 0, w, h);
+    for (let p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#FFD700";
+        ctx.fill();
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0 || p.x > w) p.vx *= -1;
+        if (p.y < 0 || p.y > h) p.vy *= -1;
+    }
+    requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+function showSection(id) {
+    document.querySelectorAll("main section").forEach(sec => sec.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+    document.querySelectorAll("nav .nav-btn").forEach(btn => btn.classList.remove("active"));
+    document.querySelector(`nav .nav-btn[onclick="showSection('${id}')"]`).classList.add("active");
+}
+
+function submitTestimony(e) {
+    e.preventDefault();
+    const title = document.getElementById("title").value.trim();
+    const content = document.getElementById("content").value.trim();
+    if (!title || !content) return;
+    const card = document.createElement("div");
+    card.className = "testimony-card";
+    card.innerHTML = `<h4>${title}</h4><p>${content.slice(0, 100)}...</p>`;
+    document.getElementById("testimonyList").prepend(card);
+    e.target.reset();
+    alert("Témoignage soumis ! Il sera publié après modération (fonctionnalité non active).");
+}
+
+function loginAdmin() {
+    const pwd = document.getElementById("adminPassword").value;
+    if (pwd === "Dd1089") { // Note: Unsecure, for demo only
+        alert("Authentification réussie ! (Panneau d'administration non fonctionnel dans cette version)");
+        document.getElementById("adminPanel").style.display = "none";
+    } else {
+        alert("Mot de passe incorrect !");
+    }
+}
+
+
+// --- YOUR QUESTIONNAIRE SCRIPT (VERSION 6.1) ---
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('paranormal-form');
+    const startBtn = document.getElementById('start-detailing-btn');
+    const templates = {
+        intensity: document.getElementById('intensity-template'),
+        scope: document.getElementById('scope-frequency-template'),
+        intelligence: document.getElementById('intelligence-template'),
+        impact: document.getElementById('impact-template'),
+        liveScore: document.getElementById('live-score-template')
+    };
+    const summaryContainer = document.getElementById('summary-container');
+    const phase1Container = document.getElementById('phase-1-selection');
+    const wizardControls = document.getElementById('wizard-controls');
+    let summaryData = [];
+
+    // --- DATA STRUCTURE FOR PHENOMENA ---
+    const phenomenaData = {
+        "Phénomènes Auditifs": {
+            prompt: "Avez-vous entendu quelque chose d'inhabituel ?",
+            choices: {
+                "pheno_voix": { label: "Voix (chuchotements, paroles claires, cris, gémissements)", verb: "entendu" },
+                "pheno_bruits": { label: "Bruits (coups, grattements, pas, portes qui grincent)", verb: "entendu" },
+                "pheno_musique": { label: "Musique (mélodie reconnaissable, notes diffuses ?)", verb: "entendu" },
+                "pheno_auditif_autre": { label: "Autre", verb: "entendu", isOther: true }
+            }
+        },
+        "Phénomènes Visuels": {
+            prompt: "Avez-vous vu quelque chose d'inhabituel ?",
+            choices: {
+                "pheno_apparition": { label: "Apparition (forme humaine, animale, autre ?)", verb: "vu" },
+                "pheno_ombre": { label: "Ombre (silhouette définie, masse sombre informe ?)", verb: "vu" },
+                "pheno_lumiere": { label: "Lumière (orbe, flash, scintillement ?)", verb: "vu" },
+                "pheno_mouvement": { label: "Mouvement (objet déplacé, porte ouverte/fermée, rideau qui bouge ?)", verb: "observé" },
+                "pheno_visuel_autre": { label: "Autre", verb: "vu", isOther: true }
+            }
+        },
+        // ... (Add all other categories here in the same structure)
+        "Phénomènes Tactiles": { prompt: "Avez-vous ressenti quelque chose d'inhabituel ?", choices: { "pheno_contact": { label: "Contact (effleurement, caresse, main posée ?)", verb: "ressenti" }, "pheno_pression": { label: "Pression (poussée, traction, sensation d’être tenu ?)", verb: "ressenti" }, "pheno_vibration": { label: "Vibration (dans le sol, sur un meuble ?)", verb: "ressenti" }, "pheno_tactile_autre": { label: "Autre", verb: "ressenti", isOther: true } } },
+        "Phénomènes Thermiques": { prompt: "Avez-vous perçu un changement inhabituel de température soudain et localisé ?", choices: { "pheno_froid": { label: "Point froid soudain", verb: "perçu" }, "pheno_chaleur": { label: "Vague de chaleur inexpliquée", verb: "perçu" }, "pheno_souffle": { label: "Sensation de souffle (froid ou chaud)", verb: "ressenti" }, "pheno_thermique_autre": { label: "Autre", verb: "perçu", isOther: true } } },
+        "Phénomènes Olfactifs": { prompt: "Avez-vous senti une odeur inhabituelle sans source apparente ?", choices: { "pheno_parfum": { label: "Parfum floral", verb: "senti" }, "pheno_soufre": { label: "Soufre", verb: "senti" }, "pheno_tabac": { label: "Tabac", verb: "senti" }, "pheno_nourriture": { label: "Nourriture", verb: "senti" }, "pheno_nauseabonde": { label: "Odeur nauséabonde", verb: "senti" }, "pheno_olfactif_autre": { label: "Autre", verb: "senti", isOther: true } } },
+        "Phénomènes Technologiques": { prompt: "Avez-vous observé une perturbation inhabituelle d’appareils électroniques ou électriques ?", choices: { "pheno_lumiere_clignote": { label: "Lumières qui clignotent", verb: "observé" }, "pheno_appareil_seul": { label: "Appareil qui s’allume ou s’éteint tout seul", verb: "observé" }, "pheno_batterie": { label: "Batterie qui se vide subitement", verb: "observé" }, "pheno_interference": { label: "Interférences audio/vidéo", verb: "observé" }, "pheno_tech_autre": { label: "Autre", verb: "observé", isOther: true } } },
+        "Phénomènes d'Emprise": { prompt: "Avez-vous ressenti une perte de contrôle ?", choices: { "pheno_possession": { label: "Possession (sentiment d’invasion, dialogues intérieurs imposés, contrôle des mouvements, perte de contrôle, colère...)", verb: "subi" } } }
+    };
+    
+    // Dynamically build the initial selection HTML
+    let initialHTML = '';
+    for (const category in phenomenaData) {
+        initialHTML += `<fieldset><legend>${category}</legend>`;
+        initialHTML += `<p class="fieldset-prompt">${phenomenaData[category].prompt}</p><div class="choices-container">`;
+        for (const id in phenomenaData[category].choices) {
+            const choice = phenomenaData[category].choices[id];
+            initialHTML += `<div class="phenomenon-choice"><div class="phenomenon-header"><input type="checkbox" id="${id}" class="phenomenon-checkbox ${choice.isOther ? 'is-other' : ''}" data-verb="${choice.verb}"><label for="${id}">${choice.label}</label>${choice.isOther ? '<input type="text" class="other-input hidden" placeholder="Décrivez...">' : ''}</div></div>`;
+        }
+        initialHTML += `</div></fieldset>`;
+    }
+    phase1Container.innerHTML = initialHTML;
+    
+    const scores = {
+        intensity: { '1': -0.2, '2': -0.5, '3': -1.0, '4': -1.5, '5': -2.0 },
+        scope: { 'Ponctuelle': -0.5, 'Localisée': -0.5, 'Étendue': -1.0, 'Personnelle': -1.0 },
+        frequency: { 'Unique': -0.2, 'Sporadique': -0.5, 'Cyclique': -0.5, 'Continu / Escalatoire': -1.0 },
+        intelligence: { 'Non-conscient et non-réactif': -0.2, 'Conscience simple et Réactif': -0.5, 'Conscience intelligente': -1.5, 'Haute conscience et Manipulateur': -2.5, 'Autre': -1.0 },
+        impact: { 'Positif / Réconfortant': -0.1, 'Neutre / Curieux': -0.5, 'Confusion / Anxiogène': -1.5, 'Négatif / Effrayant': -2.5, 'Terrifiant / Oppressant': -3.5, 'Possession': -4.5 }
+    };
+    const weights = { intensity: 0.20, scope: 0.10, intelligence: 0.30, impact: 0.40 };
+
+    form.addEventListener('change', (e) => {
+        if (e.target.classList.contains('phenomenon-checkbox')) {
+            startBtn.disabled = !form.querySelector('.phenomenon-checkbox:checked');
+            if (e.target.classList.contains('is-other')) {
+                e.target.closest('.phenomenon-header').querySelector('.other-input')?.classList.toggle('hidden', !e.target.checked);
+            }
+        }
+    });
+    startBtn.addEventListener('click', startWizard);
+
+    function startWizard() {
+        form.querySelectorAll('.phenomenon-choice').forEach(choice => {
+            if (choice.querySelector('.phenomenon-checkbox').checked) {
+                choice.dataset.status = 'pending';
+                phase1Container.appendChild(choice); // Move selected to end for processing
+            } else {
+                choice.closest('fieldset').classList.add('hidden');
+            }
+        });
+        phase1Container.querySelectorAll('fieldset:not(:has(.phenomenon-checkbox:checked))').forEach(fs => fs.classList.add('hidden'));
+        wizardControls.classList.add('hidden');
+        processNextPhenomenon();
+    }
+
+    function processNextPhenomenon() {
+        const nextPhenomenon = form.querySelector('.phenomenon-choice[data-status="pending"]');
+        document.querySelectorAll('.is-sticky').forEach(el => el.classList.remove('is-sticky'));
+        if (!nextPhenomenon) {
+            displaySummary();
+            return;
+        }
+        
+        nextPhenomenon.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const header = nextPhenomenon.querySelector('.phenomenon-header');
+        header.classList.add('is-sticky');
+
+        if (!nextPhenomenon.querySelector('.live-score-display')) {
+            const liveScoreEl = templates.liveScore.content.cloneNode(true).firstElementChild;
+            header.insertAdjacentElement('afterend', liveScoreEl);
+            liveScoreEl.classList.add('is-sticky');
+        }
+        setupIntensityValidation(nextPhenomenon);
+    }
+    
+    function setupIntensityValidation(phenomenonEl) {
+        injectTemplate(phenomenonEl, 'intensity');
+        phenomenonEl.querySelectorAll('input[name^="intensity_"]').forEach(radio => radio.addEventListener('change', () => {
+            updateLiveScore(phenomenonEl);
+            if (!phenomenonEl.querySelector('.validate-intensity-btn')) {
+                createValidationButton(phenomenonEl, "Valider l'Intensité", 'validate-intensity-btn', () => {
+                    phenomenonEl.querySelectorAll('.wizard-level:has(input[name^="intensity_"]:not(:checked))').forEach(el => el.classList.add('hidden'));
+                    setupScopeFrequencyValidation(phenomenonEl);
+                });
+            }
+        }));
+    }
+    
+    function setupScopeFrequencyValidation(phenomenonEl) {
+        injectTemplate(phenomenonEl, 'scope', '.wizard-step-wrapper');
+        phenomenonEl.querySelector('.scope-frequency-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const validationCheck = () => {
+            updateLiveScore(phenomenonEl);
+            if (phenomenonEl.querySelector('input[name^="scope_"]:checked') && phenomenonEl.querySelector('input[name^="frequency_"]:checked') && !phenomenonEl.querySelector('.validate-scope-btn')) {
+                 createValidationButton(phenomenonEl, "Valider Portée/Fréquence", 'validate-scope-btn', () => {
+                    phenomenonEl.querySelectorAll('.wizard-level:has(input[name^="scope_"]:not(:checked)), .wizard-level:has(input[name^="frequency_"]:not(:checked))').forEach(el => el.classList.add('hidden'));
+                    setupIntelligenceValidation(phenomenonEl);
+                });
+            }
+        };
+        phenomenonEl.querySelectorAll('input[name^="scope_"], input[name^="frequency_"]').forEach(radio => radio.addEventListener('change', validationCheck));
+    }
+    
+    function setupIntelligenceValidation(phenomenonEl) {
+        injectTemplate(phenomenonEl, 'intelligence', '.scope-frequency-wrapper');
+        phenomenonEl.querySelector('.intelligence-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        phenomenonEl.querySelectorAll('input[name^="intelligence_"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                 updateLiveScore(phenomenonEl);
+                 e.target.closest('.wizard-level').querySelector('textarea')?.classList.toggle('hidden', e.target.value !== 'Autre');
+                 
+                if (!phenomenonEl.querySelector('.validate-intelligence-btn')) {
+                     createValidationButton(phenomenonEl, "Valider le Niveau de Conscience", 'validate-intelligence-btn', () => {
+                        phenomenonEl.querySelectorAll('.wizard-level:has(input[name^="intelligence_"]:not(:checked))').forEach(el => el.classList.add('hidden'));
+                        setupImpactValidation(phenomenonEl);
+                    });
+                }
+            });
+        });
+    }
+
+    function setupImpactValidation(phenomenonEl) {
+        injectTemplate(phenomenonEl, 'impact', '.intelligence-wrapper');
+        phenomenonEl.querySelector('.impact-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        phenomenonEl.querySelectorAll('input[name^="impact_"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                updateLiveScore(phenomenonEl);
+                if (!phenomenonEl.querySelector('.validate-impact-btn')) {
+                    createValidationButton(phenomenonEl, "Valider et Passer au Suivant", 'validate-impact-btn', () => {
+                        phenomenonEl.dataset.status = 'done';
+                        collectAllData(phenomenonEl);
+                        processNextPhenomenon();
+                    });
+                }
+            });
+        });
+    }
+
+    function injectTemplate(phenomenonEl, templateName, afterSelector = '.live-score-display') {
+        const wrapperSelector = `.wizard-step-wrapper:has(.${templateName}-section)`;
+        if (!phenomenonEl.querySelector(wrapperSelector)) {
+            const checkboxId = phenomenonEl.querySelector('.phenomenon-checkbox').id;
+            const templateContent = templates[templateName].innerHTML.replace(/{id}/g, checkboxId);
+            phenomenonEl.querySelector(afterSelector).insertAdjacentHTML('afterend', templateContent);
+        }
+    }
+
+    function createValidationButton(phenomenonEl, text, className, onClickAction) {
+        phenomenonEl.querySelector(`.${className}`)?.remove();
+        const validateBtn = document.createElement('button');
+        validateBtn.type = 'button';
+        validateBtn.textContent = text;
+        validateBtn.className = `action-button ${className} validate-step-btn`;
+        phenomenonEl.appendChild(validateBtn);
+        validateBtn.addEventListener('click', () => {
+            validateBtn.remove();
+            onClickAction();
+        });
+    }
+
+    function updateLiveScore(phenomenonEl) {
+        const scoreDisplay = phenomenonEl.querySelector('.live-score-display span');
+        if (!scoreDisplay) return;
+        const getScore = (axis, name) => {
+            const radio = phenomenonEl.querySelector(`input[name^="${name}"]:checked`);
+            if (!radio) return 0;
+            let value = radio.value;
+            if (name === 'intelligence_' && value === 'Autre') return scores.intelligence['Autre'];
+            return scores[axis][value] || 0;
+        };
+        const scoreIntensity = getScore('intensity', 'intensity_');
+        const scoreScope = getScore('scope', 'scope_');
+        const scoreFrequency = getScore('frequency', 'frequency_');
+        const scoreAxe3 = (scoreScope + scoreFrequency) / 2;
+        const scoreIntelligence = getScore('intelligence', 'intelligence_');
+        const scoreImpact = getScore('impact', 'impact_');
+        const isms = (scoreIntensity * weights.intensity) + (scoreAxe3 * weights.scope) + (scoreIntelligence * weights.intelligence) + (scoreImpact * weights.impact);
+        phenomenonEl.dataset.isms = isms;
+        scoreDisplay.textContent = isms.toFixed(3);
+    }
+    
+    function collectAllData(phenomenonEl) {
+        let intelligenceRadio = phenomenonEl.querySelector('input[name^="intelligence_"]:checked');
+        let intelligenceValue = intelligenceRadio ? intelligenceRadio.value : 'N/A';
+        if (intelligenceValue === 'Autre') {
+           const otherDesc = intelligenceRadio.closest('.wizard-level').querySelector('textarea').value.trim();
+           if(otherDesc) intelligenceValue = `Autre : ${otherDesc}`;
+        }
+        
+        const dataPoint = {
+            phenomenonLabel: phenomenonEl.querySelector('.phenomenon-header label').textContent.trim(),
+            phenomenonVerb: phenomenonEl.querySelector('.phenomenon-checkbox').dataset.verb || 'vécu',
+            isms: parseFloat(phenomenonEl.dataset.isms || 0),
+            details: {
+                intensity: phenomenonEl.querySelector('input[name^="intensity_"]:checked')?.value || 'N/A',
+                intensityDescription: phenomenonEl.querySelector('input[name^="intensity_"]:checked')?.closest('.wizard-level').querySelector('textarea').value.trim() || "",
+                scope: phenomenonEl.querySelector('input[name^="scope_"]:checked')?.value || 'N/A',
+                frequency: phenomenonEl.querySelector('input[name^="frequency_"]:checked')?.value || 'N/A',
+                intelligence: intelligenceValue,
+                impact: phenomenonEl.querySelector('input[name^="impact_"]:checked')?.value || 'N/A'
+            }
+        };
+        const otherInput = phenomenonEl.querySelector('.other-input');
+        if(otherInput && otherInput.value.trim() !== '') {
+            dataPoint.phenomenonLabel = otherInput.value.trim();
+        }
+        summaryData.push(dataPoint);
+    }
+    
+    function displaySummary() {
+        const igms = summaryData.length > 0 ? summaryData.reduce((acc, item) => acc + item.isms, 0) / summaryData.length : 0;
+        let summaryHTML = '<h2>Bilan de votre expérience</h2>';
+        summaryHTML += `<h3>Indice Global des Manifestations Spirituelles (IGMS) : <strong>${igms.toFixed(3)}</strong></h3>`;
+        let ismsCalcParts = summaryData.map(item => `${item.isms.toFixed(3)} (${item.phenomenonLabel.split('(')[0].trim()})`);
+        summaryHTML += `<p class="calculation">IGMS = (${ismsCalcParts.join(' + ')}) / ${summaryData.length}</p>`;
+        const zone = getZone(igms);
+        const maxNegativeScore = 4.5;
+        const percent = Math.min(100, (Math.abs(igms) / maxNegativeScore) * 100);
+        summaryHTML += `<div class="thermometer-container"><div class="thermometer-fill" style="width: ${percent}%; background-color: ${zone.color};">${zone.name}</div></div>`;
+        summaryHTML += `<div class="diagnostic-box" style="border-left-color: ${zone.color}; background-color: ${zone.bgColor};"><h3>Diagnostic Global : ${zone.name}</h3><p><strong>Description :</strong> ${zone.diagnostic}</p><p><strong>Recommandations :</strong> ${zone.recommendation}</p></div>`;
+        summaryContainer.innerHTML = summaryHTML;
+        summaryContainer.classList.remove('hidden');
+        summaryContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function getZone(score) {
+        if (score > -0.5) return { name: 'Manifestations Bénignes', color: '#17a2b8', bgColor: 'rgba(23, 162, 184, 0.1)', diagnostic: "Présence d'une énergie neutre ou positive.", recommendation: "Observer avec sérénité. Pas d'action requise si le ressenti est positif." };
+        if (score > -1.5) return { name: 'Anomalie Spirituelle', color: '#ffc107', bgColor: 'rgba(255, 193, 7, 0.1)', diagnostic: "Activité résiduelle ou conscience simple. Angoissante mais pas une menace directe.", recommendation: "Documenter précisément les événements. Éviter la provocation." };
+        if (score > -2.5) return { name: 'Activité Hostile', color: '#fd7e14', bgColor: 'rgba(253, 126, 20, 0.1)', diagnostic: "Entité consciente et hostile. La situation est sérieuse.", recommendation: "Chercher du soutien (spirituel, psychologique). Mesures de protection recommandées." };
+        if (score > -3.5) return { name: 'Crise Spirituelle Majeure', color: '#dc3545', bgColor: 'rgba(220, 53, 69, 0.1)', diagnostic: "Forte suspicion d'infestation par une entité malveillante. Danger élevé.", recommendation: "Ne pas gérer cela seul. Consulter des spécialistes reconnus est fortement recommandé." };
+        return { name: 'Danger Spirituel Critique', color: '#343a40', bgColor: 'rgba(52, 58, 64, 0.1)', diagnostic: "Symptômes d'oppression sévère ou de possession. Danger critique.", recommendation: "Situation d'urgence. L'aide d'une autorité religieuse compétente est la seule recommandation appropriée." };
+    }
+});
+</script>
+
+</body>
+</html>

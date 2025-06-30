@@ -146,10 +146,16 @@
     <h2>Consultation Spirituelle</h2>
     <div class="chatbot-container">
     <p>Entrez en communication avec notre assistant spirituel...</p>
-    <div id="chatbot-integration-point" class="chatbot-placeholder">
-      Zone de chat temporaire - intégration FlowiseAI à venir
+
+    <flowise-fullchatbot></flowise-fullchatbot>
+    <script type="module">
+        import Chatbot from "https://cdn.jsdelivr.net/npm/flowise-embed/dist/web.js"
+        Chatbot.initFull({
+            chatflowid: "7b622681-09e8-45cd-b34d-acd8305fbfe7",
+            apiHost: "https://cloud.flowiseai.com",
+        })
+    </script>
     </div>
-</div>
   </section>
 
   <section id="diagnostic">
